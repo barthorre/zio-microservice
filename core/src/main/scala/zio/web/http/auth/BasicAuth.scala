@@ -13,7 +13,16 @@ object BasicAuth {
     case object Denied  extends AuthResult
   }
 
-  final case class AuthParams(realm: String, user: String, password: String)
+  final case class Sensitive(value: Array[Byte]) {
+    override def toString: String = "********"
+    def get                       = new String(value)
+  }
+
+  object Sensitive {
+    def apply(value: String): Sensitive = Sensitive(value.getBytes())
+  }
+
+  final case class AuthParams(realm: String, user: String, password: Sensitive)
 
   object AuthParams {
 
@@ -28,7 +37,7 @@ object BasicAuth {
         if (split.length == 2) {
           val username = split(0)
           val password = split(1)
-          Some(AuthParams(realm, username, password))
+          Some(AuthParams(realm, username, Sensitive(password)))
         } else {
           None
         }

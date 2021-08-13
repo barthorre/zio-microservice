@@ -153,7 +153,7 @@ object HttpMiddlewareSpec extends DefaultRunnableSpec {
   )
 
   private def authFn(p: AuthParams): UIO[AuthResult] = ZIO.succeed {
-    if (p.user == "user" && p.password == "password") {
+    if (p.user == "user" && p.password.get == "password") {
       Granted
     } else {
       Denied

@@ -1,8 +1,8 @@
 package zio.web.http.auth
 
 import zio.test.{ DefaultRunnableSpec, Gen, assert, check }
-import zio.test.Assertion.{ equalTo, isNone, isSome }
-import zio.web.http.auth.BasicAuth.AuthParams
+import zio.test.Assertion.{ equalTo, isNone, isSome, not }
+import zio.web.http.auth.BasicAuth.{ AuthParams, Sensitive }
 
 object AuthParamsSpec extends DefaultRunnableSpec {
 
@@ -25,7 +25,15 @@ object AuthParamsSpec extends DefaultRunnableSpec {
 
         assert(result.map(_.realm))(isSome(equalTo(realm))) &&
         assert(result.map(_.user))(isSome(equalTo(user))) &&
-        assert(result.map(_.password))(isSome(equalTo(password)))
+        assert(result.map(_.password.get))(isSome(equalTo(password)))
+      }
+    },
+    testM("Sensitive does not show value") {
+      check(Gen.alphaNumericStringBounded(1, 5)) { password =>
+        val sensitive = Sensitive(password)
+        assert(sensitive.toString)(not(equalTo(password))) &&
+        assert(sensitive.get)(equalTo(password)) &&
+        assert(sensitive.value.toString)(not(equalTo(password)))
       }
     }
   )
